@@ -1,113 +1,108 @@
-# lz-script
-Практически AIO скрипт для LayerZero.
+lz-script
+Practically an AIO script for LayerZero.
 
-***Скрипт подготовлен исключительно для ознакомительных целей.***  
-***This script was developed for educational purposes only.***
+The script has been prepared for informational purposes only.
+This script was developed for educational purposes only.
 
-Изменения v1.1:
-1. Добавил переменую MIN_STABLE_FOUND в файл main_config.py, чтобы скрипт не цеплял всякую мелочь с кошельков, а работал только с тем количеством стейблов, что вам нужно. Пример: на кошельке есть 2 USDT и 0.11 USDC. Если выставить MIN_STABLE_FOUND = 1.0, то скрипт будет работать только с USDT.
-2. Убрали single-сети, сделал все основными в stargate, чтобы люди не путались. Настройки сетей производится в файле main_config.py и в stargate_._settings.py
-3. Оптимизировал некоторые неточности.
-4. Убрал USDT из сети Arbitrum, т.к. с ним возникало несколько проблем при свапах.
-5. Как только добавлят поддержку стейблов в сетях zkSync и zkEVM, сразу же добавляю их в скрипт.
+Changes v1.1:
 
-## Что умеет скрипт:
-- Бриджить ВСЕ(!!!) имеющиеся USDT/USDC из любой сети в любую сеть (кроме ETH, FTM (из-за деактивации пулов), Metis)
-- Покупать STG в POLYGON и стейкать их
-- Покупать BTC в AVALANCHE, бриджить их через btcbridge в POLYGON, бриджить обратно и продавать
-- Свапать ETH в ARBITRUM или OPTIMISM на GoerliETH через https://testnetbridge.com/, в одну сторону
-- Бриджить USDT в Aptos через https://theaptosbridge.com/bridge, в одну сторону
-- Бриджить USDT в Harmony через https://bridge.harmony.one/erc20, в одну сторону
-- Разбавлять активности транзакции аппрувами в разных сетях
-- Разбавлять активности транзакции свапами в разных сетях
-- Работать в мультипотоке
-- Выбирать рандомные кошельки и выполнять активности в рандомном порядке
-- Записывать общие логи всех действий и отдельно по кошелькам
+I added the MIN_STABLE_FOUND variable to the main_config.py file so that the script does not pick up all sorts of small things from wallets, but works only with the number of stablecoins that you need. Example: There are 2 USDT and 0.11 USDC in the wallet. If you set MIN_STABLE_FOUND = 1.0, the script will only work with USDT.
+We removed single-nets, made everything basic in stargate so that people don't get confused. Network settings are made in the main_config.py file and in stargate_._settings.py
+Optimized some inaccuracies.
+I removed USDT from the Arbitrum network, as there were several problems with it during swaps.
+As soon as they add support for stablecoins in the zkSync and zkEVM networks, I immediately add them to the script.
+What the script can do:
+Bridge ALL(!!) available USDT/USDC from any network to any network (except ETH, FTM (due to deactivation of pools), Metis)
+Buy and stake STG in POLYGON
+Buy BTC in AVALANCHE, bridge it via btcbridge to POLYGON, bridge back and sell it
+Swap ETH to ARBITRUM or OPTIMISM to GoerliETH via https://testnetbridge.com/, one-way
+Bridge USDT to Aptos via https://theaptosbridge.com/bridge, one-way
+Bridge USDT to Harmony through https://bridge.harmony.one/erc20, one-way
+Dilute transaction activity with approvals on different networks
+Dilute transaction activity with swaps on different networks
+Work in a multi-thread
+Choose random wallets and perform activities in a random order
+Record general logs of all actions and separately by wallets
+Preparation for use
+Networks in the script are divided into single and non-single. Single networks - ARBITRUM, BSC, OPTIMISM - networks from which you can bridge, and B (to) cannot. It is done to save money, because the bridge to these networks is ~2 times more expensive than from these networks. Non-single networks - POLYGON, AVALANCHE - main networks.
 
-# Подготовка к использованию
-Сети в скрипте делятся на single и не-single. Single сети - ARBITRUM, BSC, OPTIMISM - сети, ИЗ (from) которых можно бриджить, а В (to) - нельзя. Сделано для экономии, т.к. бридж в эти сети в ~2 раза дороже, чем из этих сетей.
-Не-single сети - POLYGON, AVALANCHE - основные сети.
+If you have no experience in programming, re-read the instructions - do the initial setup, and do not change other code.
+We also strongly recommend that you first run 2-3 purses to understand the logic of the script
 
-**Если у вас нет опыта в программировании, перечитайте инструкцию - проведите первоначальную настройку, а другой код не меняйте.**  
-**Также настоятельно рекомендуем сначала запустить прогон 2-3х кошельков, для понимания логики работы скрипта**
+main_config.py
+WAIT_TIME = range(5, 10) - delay between actions, in minutes
+- the percentage of the USDT/USDC balance that will be used for the bridge from single networks (1 = 100%, 0.5 = 50%)
+- list of non-single networks. You can add your own (which are presented on Stargate, of course). If you don't want to dig into the code - skip, because you would have to write a separate guide to describe the process of adding.RATIO_STARGATE_SINGLE = 0.5STARGATE_CHAIN_LIST
 
-### main_config.py
-`WAIT_TIME = range(5, 10)` - задержка между действиями, в минутах  
-`RATIO_STARGATE_SINGLE = 0.5`  - процент от баланса USDT/USDC, который будет использован для бриджа из single сетей (1 = 100%, 0.5 = 50%)  
-`STARGATE_CHAIN_LIST` - список не-single сетей. Можно добавлять свои (которые представлены на Stargate, естественно). Если нет желания копаться в коде - скип, т.к. для описания процесса добавления пришлось бы писать отдельный гайд.
+max_setting.csv
+Table with commission settings (in dollars).
+- Activity
+- Maximum Transaction Fee (Gas) - Maximum Stargate Value (see screenshot below)
+ActivityMAX_GASMAX_VALUE
 
-### max_setting.csv
-Таблица с настройками комиссий (в долларах).  
-`Activity` - активность  
-`MAX_GAS` - максимальная комиссия за транзакцию (газ)  
-`MAX_VALUE` - максимальный value Stargate (см. скрин ниже)  
 
-![](https://skr.sh/i/260623/WdX1jNvH.jpg?download=1&name=%D0%A1%D0%BA%D1%80%D0%B8%D0%BD%D1%88%D0%BE%D1%82%2026-06-2023%2021:39:30.jpg)
 
-### RPCs.py
-Заполняете своими или паблик рпц.  
+RPCs.py
+Fill in your own or the public of the Russian Orthodox Church.
 
-Бесплатные приватные рпц:
-1. https://www.alchemy.com/ (с ними не было проблем)
-2. https://www.quicknode.com/
-3. https://accounts.lavanet.xyz/ (иногда отваливались)
+Free private ROCs:
 
-### stargate_settings.py
-*Опционально!*  
-Здесь можно изменить маршруты бриджей. 
+https://www.alchemy.com/ (no problems with them)
+https://www.quicknode.com/
+https://accounts.lavanet.xyz/ (sometimes fell off)
+stargate_settings.py
+Optional!
+Here you can change the routes of the bridges.
 
-Для примера возьмем ARBITRUM:  
-В `chain_to` указаны POLYGON и AVALANCHE. Если мы хотим добавить возможность бриджить из ARBITRUM в OPTIMISM - добавляем `'OPTIMISM',` с новой строки.
+Let's take ARBITRUM as an example:
+POLYGON and AVALANCHE are specified. If we want to add the ability to bridge from ARBITRUM to OPTIMISM, we add it on a new line.chain_to'OPTIMISM',
 
-### data.csv
-**Сердце скрипта! Уделите особое внимание заполнению этой таблицы.**
-*Во всех десятичных числах (17.89) пишется точка ("."), а не запятая.*
+data.csv
+The heart of the script! Pay special attention to filling out this table. All decimal numbers (17.89) have a period (".") instead of a comma.
 
-1. `DO` - нужно ли прогонять этот кошелек. Чтобы скрипт начал его прогонять, нужно написать английскую "X". Без "X" не важно, какие активности выбраны дальше. После окончания прогона всех выбранных активностей кошелька, "X" поменяется на "DONE".
-2. `Name` - название кошелька (необходимо для логов).
-3. `Wallet` - адрес кошелька в EVM-сети.
-4. `Private_key` - приватный ключ от кошелька.
-5. `Proxy` - поле для прокси. Пока не работает, оставляем пустым.
-6. `Stargate` - лог - общее количество бриджей через старгейт после запуска скрипта, изменять ничего не нужно, нужно для отчётности вам. Изначально = 0.
-7. `Stargate_range` - сумма от и до - какое количество купить USDT/USDC в не-single сетях. Если на ваших кошельках нет USDT/USDC в не-single сетях, то скрипт приобретет рандомную сумму из заданного ренжа в рандомной сети (!!!).
-8. `STARGATE_FIRST_SWAP` - указать "DONE" если приобретать USDT/USDC в не-single сетях не нужно (подразумевается, что на одной из сетей уже есть стейблы для прогона). Если покупка стейблов необходима - оставляем пустым.
-9. `STARGATE_POLYGON/AVALANCHE` - какое количество бриджей из этой сети нужно сделать через StarGate. Изначально 0. **ВАЖНО!** Должен стоять 0, а не пустая строка, иначе выдаст ошибку.
-11. `STARGATE_BSC` - по аналогии с `STARGATE_POLYGON/AVALANCHE`, только для BSC.
-9. `STARGATE_BSC_RANGE` - значение, сколько покупать USDT/USDC в BSC, по аналогии с `STARGATE_RANGE`.
-10. `STARGATE_BSC_FIRST_SWAP` - по аналогии с `STARGATE_FIRST_SWAP`, только для BSC.
-11. `STARGATE_ARBITRUM` - по аналогии с `STARGATE_POLYGON/AVALANCHE`, только для ARBITRUM.
-11. `STARGATE_ARBITRUM_RANGE` - по аналогии с `STARGATE_POLYGON/AVALANCHE`, только для ARBITRUM.
-12. `STARGATE_ARBITRUM_FIRST_SWAP` - по аналогии с `STARGATE_FIRST_SWAP`, только для ARBITRUM.
-13. `STARGATE_LIQ` - добавление ликвидности, пока не работает.
-14. `STARGATE_LIQ_VALUE` - сколько ликвидности добавить на Stargate, пока не работает.
-15. `STARGATE_STG` - нужно ли покупать и стейкать STG. Модуль работает на POLYGON.
-16. `STARGATE_STG_RANGE` - сумма от и до в $, ренж сколько покупать STG для стейка.
-17. `BTC_BRIDGE` - сколько бриджей делать из AVALANCHE в POLYGON и обратно с покупкой-продажей BTC.b. **ВАЖНО!** Должен стоять 0, а не пустая строка, иначе выдаст ошибку.
-18. `BTC_BRIDGE_RANGE` - в каком диапазоне покупать BTC.b в $ эквиваленте для работы.
-19. `BTC_BRIDGE_STEP` - этапы `BTC_BRIDGE`, трогать не нужно. Изначально пусто. С каждым этапом будет появляться "X", обозначающий, на каком этапе находится скрипт:
-Один X - купил BTC.b. Два X  - забриджил BTC.b в аваланч из полигона. Три X  - забриджил BTC.b в полигон из аваланча. Пустая строка - скрипт выполнил продажу BTC.b и вычел из колонки `BTC_BRIDGE` 1 (единицу).
-20. `TESTNET_BRIDGE` - сколько раз свапать ETH в GETH через testnetbridge.
-21. `TESTNET_BRIDGE_RANGE` - диапазон покупки GETH в $ эквиваленте.
-21. `TESTNET_BRIDGE_CHAINS` - какие сети использовать в testnetbridge. Выбирает случайную. Писать через запятую, с большой буквы.
-22. `APTOS_BRIDGE` - сколько раз бриджить USDT из BSC в APTOS.
-23. `APTOS_BRIDGE_RANGE` -  в каком диапазоне покупать USDT/USDC.
-24. `APTOS_BRIDGE_WALLET` - Уникальный Aptos кошелек, на который будут бриджиться USDT. (Генерируйте на [Cointool](https://cointool.app/createWallet/aptos "Cointool") для удобства)
-25. `HARMONY_BRIDGE` - сколько раз бриджить USDT из BSC в HARMONY.
-26. `HARMONY_BRIDGE_RANGE` - в каком диапазоне покупать USDT/USDC для бриджа.
-27. `SWAP_TOKEN` - рандомные свапы, чтобы запутать алгоритм активностей для выявления паттернов сбрива. *(Опционально)*
-28. `SWAP_TOKEN_RANGE` - в каком диапазоне свапать рандомные токены. *(Опционально)*
-29. `SWAP_TOKEN_CHAINS` - в каких сетях делать случайные свапы. *(Опционально)*
-30. `APPROVE_DO` - делать ли рандомные апрувы токенов для своего кошелька. Смысл такой же, как и в свапах токенов, но дешевле. Если делать, написать английскую "X".
-31. `APPROVE` - лог - количество апрувов, изменять ничего не нужно, нужно для отчётности вам. Изначально = 0.
-32. `APPROVE_CHAINS` -  в каких сетях делать апрувы.
-33. `APPROVE_TIMES` - какое рандомное количество апрувов от 0 до X делать между активностями.
+DO - whether it is necessary to chase away this wallet. In order for the script to start running it, you need to write an English "X". Without the "X", it doesn't matter what activities are chosen next. After the end of the run of all selected wallet activities, "X" will change to "DONE".
+Name - Wallet name (required for logs).
+Wallet - wallet address in the EVM network.
+Private_key - Private key to the wallet.
+Proxy - Proxy field. As long as it doesn't work, leave it empty.
+Stargate - log - the total number of bridges via Stargate after running the script, you don't need to change anything, you need it for reporting. Initially, = 0.
+Stargate_range - amount from and to - how much to buy USDT/USDC in non-single networks. If you don't have USDT/USDC in non-single networks in your wallets, the script will purchase a random amount from the specified range in the random network (!!).
+STARGATE_FIRST_SWAP - specify "DONE" if you do not need to purchase USDT/USDC in non-single networks (it is assumed that one of the networks already has stablecoins for the run). If the purchase of stablecoins is necessary, leave them empty.
+STARGATE_POLYGON/AVALANCHE - how many bridges from this network need to be made through StarGate. Initially 0. IMPORTANTLY! Must be 0, not an empty string, otherwise it will throw an error.
+STARGATE_BSC - similar to , only for BSC.STARGATE_POLYGON/AVALANCHE
+STARGATE_BSC_RANGE - the value of how much to buy USDT/USDC in BSC, similar to .STARGATE_RANGE
+STARGATE_BSC_FIRST_SWAP - similar to , only for BSC.STARGATE_FIRST_SWAP
+STARGATE_ARBITRUM - by analogy with , only for ARBITRUM.STARGATE_POLYGON/AVALANCHE
+STARGATE_ARBITRUM_RANGE - by analogy with , only for ARBITRUM.STARGATE_POLYGON/AVALANCHE
+STARGATE_ARBITRUM_FIRST_SWAP - by analogy with , only for ARBITRUM.STARGATE_FIRST_SWAP
+STARGATE_LIQ - Adding liquidity doesn't work yet.
+STARGATE_LIQ_VALUE - how much liquidity to add to Stargate does not work yet.
+STARGATE_STG - whether you need to buy and stake STG. The module runs on POLYGON.
+STARGATE_STG_RANGE - the amount from and to $, the range how much to buy STG for a steak.
+BTC_BRIDGE - how many bridges to make from AVALANCHE to POLYGON and back with the purchase and sale of BTC.b. IMPORTANT! Must be 0 and not an empty string, otherwise it will give an error.
+BTC_BRIDGE_RANGE - in what range to buy BTC.b in $ equivalent to work.
+BTC_BRIDGE_STEP - stages, no need to touch. Initially empty. With each stage, an "X" will appear, indicating which stage the script is in: One X - bought BTC.b. Two X - bridged BTC.b into avalanche from the polygon. Three X - BTC.b bridged into the Avalanche polygon. Empty line - the script sold BTC.b and subtracted (one) from column 1.BTC_BRIDGEBTC_BRIDGE
+TESTNET_BRIDGE - the number of times to swap ETH to GETH via testnetbridge.
+TESTNET_BRIDGE_RANGE - the range of buying GETH in $ equivalent.
+TESTNET_BRIDGE_CHAINS - Which networks to use in TestnetBridge. Chooses a random one. Write separated by commas, with a capital letter.
+APTOS_BRIDGE - how many times to bridge USDT from BSC to APTOS.
+APTOS_BRIDGE_RANGE - in what range to buy USDT/USDC.
+APTOS_BRIDGE_WALLET - A unique Aptos wallet to which USDT will be bridged. (Generate on Cointool for convenience)
+HARMONY_BRIDGE - how many times to bridge USDT from BSC to HARMONY.
+HARMONY_BRIDGE_RANGE - In what range to buy USDT/USDC for bridge.
+SWAP_TOKEN - random swaps to confuse the algorithm of activities to identify shave patterns. (Optional)
+SWAP_TOKEN_RANGE - in what range to swap random tokens. (Optional)
+SWAP_TOKEN_CHAINS - In which networks to make random swaps. (Optional)
+APPROVE_DO - whether to make random token approvals for your wallet. The meaning is the same as token swaps, but cheaper. If you do, write the English "X".
+APPROVE - log - the number of approvals, you don't need to change anything, you need it for reporting. Initially, = 0.
+APPROVE_CHAINS - In which networks to approve.
+APPROVE_TIMES - what is the random number of approvals from 0 to X to make between activities.
+Logs
+Text files with logs for specific wallets will appear in the folder. This is necessary for the convenience of tracking possible bugs and errors.
+The file contains the entire log of activities. If it says "True" at the end of the line, it means that the activity was completed successfully. If it says "False", it means that the activity ended with an error. Also, in the cell with "False", the encountered error will be indicated.
+The log from Cmd/IDE is duplicated into the file. In the same way, but broken down by wallets.log_walletlog.csvmain.txtlog_wallet
 
-# Логи
-В папке `log_wallet` будут появляться текстовые файлы с логами по конкретным кошелькам. Это необходимо для удобства отслеживания возможных багов и ошибок.  
-В файле `log.csv` ведется весь лог по активностям. Если в конце строки написано "True" - значит активность завершилась успешно. Если же написано "False" - значит активность завершилась с ошибкой. Также в ячейке с "False" будет указана встреченная ошибка.  
-В файл `main.txt` дублируется лог из Cmd / IDE. В `log_wallet` то же самое, но с разбивкой по кошелькам.
+Notes
+In case an error occurs while the script is running, the script will move on until it completes all the activities and there are no activities that it fails to perform (lack of funds, pool problem, etc.). All errors can be viewed in the logs.
 
-# Примечания
-В случае, если во время работы скрипта произошла ошибка, скрипт будет двигаться дальше, пока не завершит все активности и не останутся те активности, которые ему не удается выполнить (не хватает средств, проблема с пулом и т.д.). Все ошибки можно посмотреть в логах. 
-
-**Постарайтесь не останавливать скрипт во время выполнения. Если же все-таки без остановки не обойтись - дождитесь выполнения активности и появления строки `Запуск в...`, а после, остановите скрипт комбинацией клавиш Ctrl+Pause Break. Иначе вам придется разбираться, на каком этапе вы прервали скрипт и редактировать `data.csv`**
+Try not to stop the script at runtime. If you still can't do without stopping, wait for the activity to be completed and the Start in... line appears, and then stop the script with the Ctrl+Pause Break key combination. Otherwise, you will have to figure out at what stage you interrupted the script and edit data.csv
